@@ -64,9 +64,10 @@ func ExtractEpisodeTagFromTrack(trackName string) (episodeTag string) {
 
 type PropDefs struct {
 	Definitions []struct {
-		Name string `yaml:"name"`
-		Hook string `yaml:"hook"`
-		List bool   `yaml:"list"`
+		Name      string `yaml:"name"`
+		Hook      string `yaml:"hook"`
+		List      bool   `yaml:"list"`
+		Attribute string `yaml:"attribute"`
 	} `yaml:"propDefs"`
 }
 
@@ -98,7 +99,11 @@ func ExtractProperties(doc *html.Node, propertiesDefinitions *PropDefs) (propert
 			properties[propDef.Name] = contents
 		} else {
 			htmlNode := htmlquery.FindOne(doc, propDef.Hook)
-			properties[propDef.Name] = htmlquery.InnerText(htmlNode)
+			if propDef.Attribute != "" {
+				properties[propDef.Name] = htmlquery.SelectAttr(htmlNode, propDef.Attribute)
+			} else {
+				properties[propDef.Name] = htmlquery.InnerText(htmlNode)
+			}
 		}
 	}
 

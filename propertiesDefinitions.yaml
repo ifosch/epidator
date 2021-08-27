@@ -1,3 +1,4 @@
+feedURL: http://my.podcast.com/podcast/feed.xml
 propDefs:
 - name: title
   hook: /html/body/p/span[contains(@style,"font-size:24pt;")]
@@ -5,6 +6,10 @@ propDefs:
 - name: summary
   hook: /html/body/p[contains(@style,"color:#666666;")]
   list: false
+- name: image
+  hook: /html/body/p/span/img
+  list: false
+  attribute: src
 - name: links
   hook: /html/body/ul[last()]/li
   list: true
