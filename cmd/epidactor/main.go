@@ -2,42 +2,51 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
 	"strings"
 
+	"github.com/antchfx/htmlquery"
 	"github.com/ifosch/stationery/pkg/gdrive"
 	"github.com/ifosch/stationery/pkg/stationery"
+	"golang.org/x/net/html"
+	"gopkg.in/yaml.v2"
 )
 
-func GetScript(episodeTag string) (string, error) {
+func GetScript(episodeTag string) (*html.Node, error) {
 	q := fmt.Sprintf("name contains '%v'", episodeTag)
 
 	svc, err := gdrive.GetService(os.Getenv("DRIVE_CREDENTIALS_FILE"))
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if len(q) == 0 {
-		return "", fmt.Errorf("no matching scripts, please add a query returning one single document")
+		return nil, fmt.Errorf("no matching scripts, please add a query returning one single document")
 	}
 
 	r, err := stationery.GetFiles(svc, q)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if len(r) > 1 {
-		return "", fmt.Errorf("too many results. Query must return only one document, not %v", len(r))
+		return nil, fmt.Errorf("too many results. Query must return only one document, not %v", len(r))
 	}
 
 	content, err := stationery.ExportHTML(svc, r[0])
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return content, nil
+	doc, err := htmlquery.Parse(strings.NewReader(content))
+	if err != nil {
+		return nil, err
+	}
+
+	return doc, nil
 }
 
 func ExtractEpisodeTagFromTrack(trackName string) (episodeTag string) {
@@ -53,13 +62,71 @@ func ExtractEpisodeTagFromTrack(trackName string) (episodeTag string) {
 	return fmt.Sprintf("%s %s", tag, numberRE.FindString(trackName))
 }
 
+type PropDefs struct {
+	Definitions []struct {
+		Name string `yaml:"name"`
+		Hook string `yaml:"hook"`
+		List bool   `yaml:"list"`
+	} `yaml:"propDefs"`
+}
+
+func NewPropDefs(YAMLFile string) (*PropDefs, error) {
+	f, err := ioutil.ReadFile(YAMLFile)
+	if err != nil {
+		return nil, err
+	}
+
+	propDefs := &PropDefs{}
+	err = yaml.Unmarshal([]byte(f), propDefs)
+	if err != nil {
+		return nil, err
+	}
+
+	return propDefs, nil
+}
+
+func ExtractProperties(doc *html.Node, propertiesDefinitions *PropDefs) (properties map[string]interface{}) {
+	properties = map[string]interface{}{}
+
+	for _, propDef := range propertiesDefinitions.Definitions {
+		if propDef.List {
+			htmlNodes := htmlquery.Find(doc, propDef.Hook)
+			contents := []string{}
+			for _, htmlNode := range htmlNodes {
+				contents = append(contents, htmlquery.InnerText(htmlNode))
+			}
+			properties[propDef.Name] = contents
+		} else {
+			htmlNode := htmlquery.FindOne(doc, propDef.Hook)
+			properties[propDef.Name] = htmlquery.InnerText(htmlNode)
+		}
+	}
+
+	return
+}
+
+func PrintYAML(properties map[string]interface{}) error {
+	outputData, err := yaml.Marshal(properties)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(string(outputData))
+	return nil
+}
+
 func main() {
 	log.SetFlags(0)
 
-	content, err := GetScript(ExtractEpisodeTagFromTrack(os.Args[1]))
+	doc, err := GetScript(ExtractEpisodeTagFromTrack(os.Args[1]))
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Println(content)
+	propertiesDefinitions, err := NewPropDefs("propertiesDefinitions.yaml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	PrintYAML(ExtractProperties(doc, propertiesDefinitions))
 }

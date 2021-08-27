@@ -1,0 +1,10 @@
+propDefs:
+- name: title
+  hook: /html/body/p/span[contains(@style,"font-size:24pt;")]
+  list: false
+- name: summary
+  hook: /html/body/p[contains(@style,"color:#666666;")]
+  list: false
+- name: links
+  hook: /html/body/ul[last()]/li
+  list: true
