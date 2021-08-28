@@ -1,5 +1,7 @@
 feedURL: http://my.podcast.com/podcast/feed.xml
 cover: https://my.podcast.com/media/cover.png
+masterURL: https://my.podcast.com/masters/<FILE>
+introURL: https://my.podcast.com/media/intro.mp3
 artist: Me
 album: My Podcast
 propDefs:

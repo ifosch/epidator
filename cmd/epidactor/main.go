@@ -81,10 +81,12 @@ func ExtractEpisodeTagFromTrack(trackName string) (episodeTag string) {
 }
 
 type PropDefs struct {
-	URL         string `yaml:"feedURL"`
+	FeedURL     string `yaml:"feedURL"`
 	Cover       string `yaml:"cover"`
 	Artist      string `yaml:"artist"`
 	Album       string `yaml:"album"`
+	MasterURL   string `yaml:"masterURL"`
+	IntroURL    string `yaml:"introURL"`
 	Definitions []struct {
 		Name      string `yaml:"name"`
 		Hook      string `yaml:"hook"`
@@ -119,7 +121,7 @@ func ExtractTrackNo(feed *html.Node, propertiesDefinitions *PropDefs) (int, erro
 	return trackNo, nil
 }
 
-func ExtractProperties(doc, feed *html.Node, propertiesDefinitions *PropDefs) (properties map[string]interface{}, err error) {
+func ExtractProperties(trackFileName string, doc, feed *html.Node, propertiesDefinitions *PropDefs) (properties map[string]interface{}, err error) {
 	properties = map[string]interface{}{}
 
 	for _, propDef := range propertiesDefinitions.Definitions {
@@ -150,6 +152,8 @@ func ExtractProperties(doc, feed *html.Node, propertiesDefinitions *PropDefs) (p
 	properties["cover"] = propertiesDefinitions.Cover
 	properties["artist"] = propertiesDefinitions.Artist
 	properties["album"] = propertiesDefinitions.Album
+	properties["master"] = strings.Replace(propertiesDefinitions.MasterURL, "<FILE>", trackFileName, 1)
+	properties["intro"] = propertiesDefinitions.IntroURL
 
 	return properties, nil
 }
@@ -177,12 +181,12 @@ func main() {
 		log.Fatal(err)
 	}
 
-	feed, err := GetFeed(propertiesDefinitions.URL)
+	feed, err := GetFeed(propertiesDefinitions.FeedURL)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	properties, err := ExtractProperties(script, feed, propertiesDefinitions)
+	properties, err := ExtractProperties(os.Args[1], script, feed, propertiesDefinitions)
 	if err != nil {
 		log.Fatal(err)
 	}
