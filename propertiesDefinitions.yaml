@@ -1,4 +1,7 @@
 feedURL: http://my.podcast.com/podcast/feed.xml
+cover: https://my.podcast.com/media/cover.png
+artist: Me
+album: My Podcast
 propDefs:
 - name: title
   hook: /html/body/p/span[contains(@style,"font-size:24pt;")]

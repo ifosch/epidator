@@ -8,6 +8,7 @@ import (
 	"os"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/antchfx/htmlquery"
 	"github.com/antchfx/xpath"
@@ -81,6 +82,9 @@ func ExtractEpisodeTagFromTrack(trackName string) (episodeTag string) {
 
 type PropDefs struct {
 	URL         string `yaml:"feedURL"`
+	Cover       string `yaml:"cover"`
+	Artist      string `yaml:"artist"`
+	Album       string `yaml:"album"`
 	Definitions []struct {
 		Name      string `yaml:"name"`
 		Hook      string `yaml:"hook"`
@@ -142,6 +146,10 @@ func ExtractProperties(doc, feed *html.Node, propertiesDefinitions *PropDefs) (p
 	}
 
 	properties["trackNo"] = trackNo + 1
+	properties["pubDate"] = time.Now()
+	properties["cover"] = propertiesDefinitions.Cover
+	properties["artist"] = propertiesDefinitions.Artist
+	properties["album"] = propertiesDefinitions.Album
 
 	return properties, nil
 }
