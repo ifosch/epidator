@@ -4,6 +4,7 @@ go 1.17
 
 require (
 	github.com/antchfx/htmlquery v1.2.3
+	github.com/antchfx/xpath v1.1.6
 	github.com/ifosch/stationery v0.1.2
 	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420
 	gopkg.in/yaml.v2 v2.4.0
@@ -11,7 +12,6 @@ require (
 
 require (
 	cloud.google.com/go v0.93.3 // indirect
-	github.com/antchfx/xpath v1.1.6 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect

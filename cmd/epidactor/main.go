@@ -4,16 +4,33 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
 
 	"github.com/antchfx/htmlquery"
+	"github.com/antchfx/xpath"
 	"github.com/ifosch/stationery/pkg/gdrive"
 	"github.com/ifosch/stationery/pkg/stationery"
 	"golang.org/x/net/html"
 	"gopkg.in/yaml.v2"
 )
+
+func GetFeed(URL string) (*html.Node, error) {
+	resp, err := http.Get(URL)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	doc, err := html.Parse(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return doc, nil
+}
 
 func GetScript(episodeTag string) (*html.Node, error) {
 	q := fmt.Sprintf("name contains '%v'", episodeTag)
@@ -63,6 +80,7 @@ func ExtractEpisodeTagFromTrack(trackName string) (episodeTag string) {
 }
 
 type PropDefs struct {
+	URL         string `yaml:"feedURL"`
 	Definitions []struct {
 		Name      string `yaml:"name"`
 		Hook      string `yaml:"hook"`
@@ -86,7 +104,18 @@ func NewPropDefs(YAMLFile string) (*PropDefs, error) {
 	return propDefs, nil
 }
 
-func ExtractProperties(doc *html.Node, propertiesDefinitions *PropDefs) (properties map[string]interface{}) {
+func ExtractTrackNo(feed *html.Node, propertiesDefinitions *PropDefs) (int, error) {
+	expr, err := xpath.Compile("count(//item)")
+	if err != nil {
+		return 0, err
+	}
+
+	trackNo := int(expr.Evaluate(htmlquery.CreateXPathNavigator(feed)).(float64))
+
+	return trackNo, nil
+}
+
+func ExtractProperties(doc, feed *html.Node, propertiesDefinitions *PropDefs) (properties map[string]interface{}, err error) {
 	properties = map[string]interface{}{}
 
 	for _, propDef := range propertiesDefinitions.Definitions {
@@ -107,7 +136,14 @@ func ExtractProperties(doc *html.Node, propertiesDefinitions *PropDefs) (propert
 		}
 	}
 
-	return
+	trackNo, err := ExtractTrackNo(feed, propertiesDefinitions)
+	if err != nil {
+		return nil, err
+	}
+
+	properties["trackNo"] = trackNo + 1
+
+	return properties, nil
 }
 
 func PrintYAML(properties map[string]interface{}) error {
@@ -123,15 +159,25 @@ func PrintYAML(properties map[string]interface{}) error {
 func main() {
 	log.SetFlags(0)
 
-	doc, err := GetScript(ExtractEpisodeTagFromTrack(os.Args[1]))
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	propertiesDefinitions, err := NewPropDefs("propertiesDefinitions.yaml")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	PrintYAML(ExtractProperties(doc, propertiesDefinitions))
+	script, err := GetScript(ExtractEpisodeTagFromTrack(os.Args[1]))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	feed, err := GetFeed(propertiesDefinitions.URL)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	properties, err := ExtractProperties(script, feed, propertiesDefinitions)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	PrintYAML(properties)
 }
