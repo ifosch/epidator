@@ -22,7 +22,8 @@ type PropDefs struct {
 		List      bool   `yaml:"list"`
 		Attribute string `yaml:"attribute"`
 	} `yaml:"propDefs"`
-	trackName string
+	EpisodeHooks map[string]string `yaml:"episodeHooks"`
+	trackName    string
 }
 
 func NewPropDefs(trackName, YAMLFile string) (*PropDefs, error) {
@@ -45,11 +46,14 @@ func NewPropDefs(trackName, YAMLFile string) (*PropDefs, error) {
 func (pd *PropDefs) EpisodeHook() string {
 	numberRE := regexp.MustCompile("[0-9]+")
 
-	tag := "Podcast"
-	if strings.Contains(pd.trackName, "pildora") {
-		tag = "Píldora"
-	} else if strings.Contains(pd.trackName, "colaboracion") {
-		tag = "Colaboración"
+	tag := ""
+	for k, v := range pd.EpisodeHooks {
+		if strings.Contains(pd.trackName, k) {
+			tag = v
+		}
+	}
+	if tag == "" {
+		tag = pd.EpisodeHooks["default"]
 	}
 
 	return fmt.Sprintf("%s %s", tag, numberRE.FindString(pd.trackName))

@@ -68,8 +68,8 @@ func TestGetEpisodeDetails(t *testing.T) {
 			},
 		},
 		{
-			"mypodcast-colaboracion1.master.mp3",
-			"Colaboración 1",
+			"mypodcast-collaboration1.master.mp3",
+			"Collaboration 1",
 			"../../propertiesDefinitions.yaml",
 			`<html><body>
 			<p><span style="font-size:24pt;">Collaboration 1 - My friend's episode</span></p>
@@ -92,7 +92,7 @@ func TestGetEpisodeDetails(t *testing.T) {
 					"One mentioned link - https://my.podcast.com/referrals",
 					"Another mentioned link - https://my.podcast.com/patreon",
 				},
-				"master":  "https://my.podcast.com/masters/mypodcast-colaboracion1.master.mp3",
+				"master":  "https://my.podcast.com/masters/mypodcast-collaboration1.master.mp3",
 				"pubDate": time.Now(),
 				"summary": "In this collaboration, I'm hosting my friend's episode.",
 				"title":   "Collaboration 1 - My friend's episode",
