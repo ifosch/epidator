@@ -17,7 +17,9 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func GetFeed(URL string) (*html.Node, error) {
+var Now = time.Now
+
+var GetFeed = func(URL string) (*html.Node, error) {
 	resp, err := http.Get(URL)
 	if err != nil {
 		return nil, err
@@ -32,7 +34,7 @@ func GetFeed(URL string) (*html.Node, error) {
 	return doc, nil
 }
 
-func GetScript(episodeTag string) (*html.Node, error) {
+var GetScript = func(episodeTag string) (*html.Node, error) {
 	q := fmt.Sprintf("name contains '%v'", episodeTag)
 
 	svc, err := gdrive.GetService(os.Getenv("DRIVE_CREDENTIALS_FILE"))
@@ -147,7 +149,7 @@ func ExtractProperties(trackFileName string, doc, feed *html.Node, propertiesDef
 	}
 
 	properties["trackNo"] = trackNo + 1
-	properties["pubDate"] = time.Now()
+	properties["pubDate"] = Now()
 	properties["cover"] = propertiesDefinitions.Cover
 	properties["artist"] = propertiesDefinitions.Artist
 	properties["album"] = propertiesDefinitions.Album
