@@ -6,6 +6,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/antchfx/htmlquery"
+	"golang.org/x/net/html"
 	"gopkg.in/yaml.v2"
 )
 
@@ -24,6 +26,8 @@ type PropDefs struct {
 	} `yaml:"propDefs"`
 	EpisodeHooks map[string]string `yaml:"episodeHooks"`
 	trackName    string
+	scriptTree   *html.Node
+	feedTree     *html.Node
 }
 
 func NewPropDefs(trackName, YAMLFile string) (*PropDefs, error) {
@@ -36,6 +40,26 @@ func NewPropDefs(trackName, YAMLFile string) (*PropDefs, error) {
 		trackName: trackName,
 	}
 	err = yaml.Unmarshal([]byte(f), propDefs)
+	if err != nil {
+		return nil, err
+	}
+
+	script, err := GetScript(propDefs.EpisodeHook())
+	if err != nil {
+		return nil, err
+	}
+
+	propDefs.scriptTree, err = htmlquery.Parse(strings.NewReader(script))
+	if err != nil {
+		return nil, err
+	}
+
+	feed, err := GetFeed(propDefs.FeedURL)
+	if err != nil {
+		return nil, err
+	}
+
+	propDefs.feedTree, err = htmlquery.Parse(strings.NewReader(feed))
 	if err != nil {
 		return nil, err
 	}

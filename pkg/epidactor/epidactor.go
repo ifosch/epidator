@@ -72,28 +72,19 @@ func ExtractTrackNo(feed *html.Node, propertiesDefinitions *PropDefs) (int, erro
 	return trackNo, nil
 }
 
-func ExtractProperties(trackFileName, script, feed string, propertiesDefinitions *PropDefs) (properties map[string]interface{}, err error) {
+func ExtractProperties(propertiesDefinitions *PropDefs) (properties map[string]interface{}, err error) {
 	properties = map[string]interface{}{}
-
-	scriptTree, err := htmlquery.Parse(strings.NewReader(script))
-	if err != nil {
-		return nil, err
-	}
-	feedTree, err := htmlquery.Parse(strings.NewReader(feed))
-	if err != nil {
-		return nil, err
-	}
 
 	for _, propDef := range propertiesDefinitions.Definitions {
 		if propDef.List {
-			htmlNodes := htmlquery.Find(scriptTree, propDef.Hook)
+			htmlNodes := htmlquery.Find(propertiesDefinitions.scriptTree, propDef.Hook)
 			contents := []string{}
 			for _, htmlNode := range htmlNodes {
 				contents = append(contents, htmlquery.InnerText(htmlNode))
 			}
 			properties[propDef.Name] = contents
 		} else {
-			htmlNode := htmlquery.FindOne(scriptTree, propDef.Hook)
+			htmlNode := htmlquery.FindOne(propertiesDefinitions.scriptTree, propDef.Hook)
 			if propDef.Attribute != "" {
 				properties[propDef.Name] = htmlquery.SelectAttr(htmlNode, propDef.Attribute)
 			} else {
@@ -102,7 +93,7 @@ func ExtractProperties(trackFileName, script, feed string, propertiesDefinitions
 		}
 	}
 
-	trackNo, err := ExtractTrackNo(feedTree, propertiesDefinitions)
+	trackNo, err := ExtractTrackNo(propertiesDefinitions.feedTree, propertiesDefinitions)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +103,7 @@ func ExtractProperties(trackFileName, script, feed string, propertiesDefinitions
 	properties["cover"] = propertiesDefinitions.Cover
 	properties["artist"] = propertiesDefinitions.Artist
 	properties["album"] = propertiesDefinitions.Album
-	properties["master"] = strings.Replace(propertiesDefinitions.MasterURL, "<FILE>", trackFileName, 1)
+	properties["master"] = strings.Replace(propertiesDefinitions.MasterURL, "<FILE>", propertiesDefinitions.trackName, 1)
 	properties["intro"] = propertiesDefinitions.IntroURL
 
 	return properties, nil
@@ -124,17 +115,7 @@ func GetEpisodeDetails(trackName, propertiesDefinitionsYAML string) (map[string]
 		return nil, err
 	}
 
-	script, err := GetScript(propertiesDefinitions.EpisodeHook())
-	if err != nil {
-		return nil, err
-	}
-
-	feed, err := GetFeed(propertiesDefinitions.FeedURL)
-	if err != nil {
-		return nil, err
-	}
-
-	properties, err := ExtractProperties(trackName, script, feed, propertiesDefinitions)
+	properties, err := ExtractProperties(propertiesDefinitions)
 	if err != nil {
 		return nil, err
 	}
