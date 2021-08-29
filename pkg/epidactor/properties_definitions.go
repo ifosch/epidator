@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/antchfx/htmlquery"
+	"github.com/antchfx/xpath"
 	"golang.org/x/net/html"
 	"gopkg.in/yaml.v2"
 )
@@ -81,4 +82,15 @@ func (pd *PropDefs) EpisodeHook() string {
 	}
 
 	return fmt.Sprintf("%s %s", tag, numberRE.FindString(pd.trackName))
+}
+
+func (pd *PropDefs) TrackNo() (int, error) {
+	expr, err := xpath.Compile("count(//item)")
+	if err != nil {
+		return 0, err
+	}
+
+	trackNo := int(expr.Evaluate(htmlquery.CreateXPathNavigator(pd.feedTree)).(float64)) + 1
+
+	return trackNo, nil
 }

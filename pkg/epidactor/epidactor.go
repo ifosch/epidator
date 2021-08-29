@@ -9,10 +9,8 @@ import (
 	"time"
 
 	"github.com/antchfx/htmlquery"
-	"github.com/antchfx/xpath"
 	"github.com/ifosch/stationery/pkg/gdrive"
 	"github.com/ifosch/stationery/pkg/stationery"
-	"golang.org/x/net/html"
 )
 
 var Now = time.Now
@@ -61,17 +59,6 @@ var GetScript = func(episodeTag string) (string, error) {
 	return content, nil
 }
 
-func ExtractTrackNo(feed *html.Node, propertiesDefinitions *PropDefs) (int, error) {
-	expr, err := xpath.Compile("count(//item)")
-	if err != nil {
-		return 0, err
-	}
-
-	trackNo := int(expr.Evaluate(htmlquery.CreateXPathNavigator(feed)).(float64))
-
-	return trackNo, nil
-}
-
 func ExtractProperties(propertiesDefinitions *PropDefs) (properties map[string]interface{}, err error) {
 	properties = map[string]interface{}{}
 
@@ -93,12 +80,12 @@ func ExtractProperties(propertiesDefinitions *PropDefs) (properties map[string]i
 		}
 	}
 
-	trackNo, err := ExtractTrackNo(propertiesDefinitions.feedTree, propertiesDefinitions)
+	trackNo, err := propertiesDefinitions.TrackNo()
 	if err != nil {
 		return nil, err
 	}
 
-	properties["trackNo"] = trackNo + 1
+	properties["trackNo"] = trackNo
 	properties["pubDate"] = Now()
 	properties["cover"] = propertiesDefinitions.Cover
 	properties["artist"] = propertiesDefinitions.Artist
