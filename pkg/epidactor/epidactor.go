@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"regexp"
 	"strings"
 	"time"
 
@@ -60,19 +59,6 @@ var GetScript = func(episodeTag string) (string, error) {
 	}
 
 	return content, nil
-}
-
-func ExtractEpisodeTagFromTrack(trackName string) (episodeTag string) {
-	numberRE := regexp.MustCompile("[0-9]+")
-
-	tag := "Podcast"
-	if strings.Contains(trackName, "pildora") {
-		tag = "Píldora"
-	} else if strings.Contains(trackName, "colaboracion") {
-		tag = "Colaboración"
-	}
-
-	return fmt.Sprintf("%s %s", tag, numberRE.FindString(trackName))
 }
 
 func ExtractTrackNo(feed *html.Node, propertiesDefinitions *PropDefs) (int, error) {
@@ -133,12 +119,12 @@ func ExtractProperties(trackFileName, script, feed string, propertiesDefinitions
 }
 
 func GetEpisodeDetails(trackName, propertiesDefinitionsYAML string) (map[string]interface{}, error) {
-	propertiesDefinitions, err := NewPropDefs(propertiesDefinitionsYAML)
+	propertiesDefinitions, err := NewPropDefs(trackName, propertiesDefinitionsYAML)
 	if err != nil {
 		return nil, err
 	}
 
-	script, err := GetScript(ExtractEpisodeTagFromTrack(trackName))
+	script, err := GetScript(propertiesDefinitions.EpisodeHook())
 	if err != nil {
 		return nil, err
 	}
