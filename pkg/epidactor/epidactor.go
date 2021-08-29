@@ -19,53 +19,48 @@ import (
 
 var Now = time.Now
 
-var GetFeed = func(URL string) (*html.Node, error) {
+var GetFeed = func(URL string) (string, error) {
 	resp, err := http.Get(URL)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer resp.Body.Close()
 
-	doc, err := html.Parse(resp.Body)
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return doc, nil
+	return string(bodyBytes), nil
 }
 
-var GetScript = func(episodeTag string) (*html.Node, error) {
+var GetScript = func(episodeTag string) (string, error) {
 	q := fmt.Sprintf("name contains '%v'", episodeTag)
 
 	svc, err := gdrive.GetService(os.Getenv("DRIVE_CREDENTIALS_FILE"))
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if len(q) == 0 {
-		return nil, fmt.Errorf("no matching scripts, please add a query returning one single document")
+		return "", fmt.Errorf("no matching scripts, please add a query returning one single document")
 	}
 
 	r, err := stationery.GetFiles(svc, q)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	if len(r) > 1 {
-		return nil, fmt.Errorf("too many results. Query must return only one document, not %v", len(r))
+		return "", fmt.Errorf("too many results. Query must return only one document, not %v", len(r))
 	}
 
 	content, err := stationery.ExportHTML(svc, r[0])
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	doc, err := htmlquery.Parse(strings.NewReader(content))
-	if err != nil {
-		return nil, err
-	}
-
-	return doc, nil
+	return content, nil
 }
 
 func ExtractEpisodeTagFromTrack(trackName string) (episodeTag string) {
@@ -122,19 +117,28 @@ func ExtractTrackNo(feed *html.Node, propertiesDefinitions *PropDefs) (int, erro
 	return trackNo, nil
 }
 
-func ExtractProperties(trackFileName string, doc, feed *html.Node, propertiesDefinitions *PropDefs) (properties map[string]interface{}, err error) {
+func ExtractProperties(trackFileName, script, feed string, propertiesDefinitions *PropDefs) (properties map[string]interface{}, err error) {
 	properties = map[string]interface{}{}
+
+	scriptTree, err := htmlquery.Parse(strings.NewReader(script))
+	if err != nil {
+		return nil, err
+	}
+	feedTree, err := htmlquery.Parse(strings.NewReader(feed))
+	if err != nil {
+		return nil, err
+	}
 
 	for _, propDef := range propertiesDefinitions.Definitions {
 		if propDef.List {
-			htmlNodes := htmlquery.Find(doc, propDef.Hook)
+			htmlNodes := htmlquery.Find(scriptTree, propDef.Hook)
 			contents := []string{}
 			for _, htmlNode := range htmlNodes {
 				contents = append(contents, htmlquery.InnerText(htmlNode))
 			}
 			properties[propDef.Name] = contents
 		} else {
-			htmlNode := htmlquery.FindOne(doc, propDef.Hook)
+			htmlNode := htmlquery.FindOne(scriptTree, propDef.Hook)
 			if propDef.Attribute != "" {
 				properties[propDef.Name] = htmlquery.SelectAttr(htmlNode, propDef.Attribute)
 			} else {
@@ -143,7 +147,7 @@ func ExtractProperties(trackFileName string, doc, feed *html.Node, propertiesDef
 		}
 	}
 
-	trackNo, err := ExtractTrackNo(feed, propertiesDefinitions)
+	trackNo, err := ExtractTrackNo(feedTree, propertiesDefinitions)
 	if err != nil {
 		return nil, err
 	}

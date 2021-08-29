@@ -2,37 +2,23 @@ package epidactor
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 	"time"
-
-	"github.com/antchfx/htmlquery"
-	"golang.org/x/net/html"
 )
 
-func MockGetScript(expectedEpisodeHook, expectedOutput string) func(string) (*html.Node, error) {
-	return func(episodeHook string) (*html.Node, error) {
+func MockGetScript(expectedEpisodeHook, expectedOutput string) func(string) (string, error) {
+	return func(episodeHook string) (string, error) {
 		if episodeHook != expectedEpisodeHook {
-			return nil, fmt.Errorf("document not found. Query was \"name contains '%s'\"", episodeHook)
+			return "", fmt.Errorf("document not found. Query was \"name contains '%s'\"", episodeHook)
 		}
 
-		doc, err := htmlquery.Parse(strings.NewReader(expectedOutput))
-		if err != nil {
-			return nil, err
-		}
-
-		return doc, nil
+		return expectedOutput, nil
 	}
 }
 
-func MockGetFeed(expectedOutput string) func(string) (*html.Node, error) {
-	return func(string) (*html.Node, error) {
-		doc, err := htmlquery.Parse(strings.NewReader(expectedOutput))
-		if err != nil {
-			return nil, err
-		}
-
-		return doc, nil
+func MockGetFeed(expectedOutput string) func(string) (string, error) {
+	return func(string) (string, error) {
+		return expectedOutput, nil
 	}
 }
 
