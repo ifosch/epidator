@@ -29,6 +29,7 @@ type PropDefs struct {
 	trackName    string
 	scriptTree   *html.Node
 	feedTree     *html.Node
+	properties   map[string]interface{}
 }
 
 func NewPropDefs(trackName, YAMLFile string) (*PropDefs, error) {
@@ -38,7 +39,8 @@ func NewPropDefs(trackName, YAMLFile string) (*PropDefs, error) {
 	}
 
 	propDefs := &PropDefs{
-		trackName: trackName,
+		trackName:  trackName,
+		properties: map[string]interface{}{},
 	}
 	err = yaml.Unmarshal([]byte(f), propDefs)
 	if err != nil {
@@ -61,6 +63,11 @@ func NewPropDefs(trackName, YAMLFile string) (*PropDefs, error) {
 	}
 
 	propDefs.feedTree, err = htmlquery.Parse(strings.NewReader(feed))
+	if err != nil {
+		return nil, err
+	}
+
+	err = propDefs.ExtractProperties()
 	if err != nil {
 		return nil, err
 	}
@@ -93,4 +100,39 @@ func (pd *PropDefs) TrackNo() (int, error) {
 	trackNo := int(expr.Evaluate(htmlquery.CreateXPathNavigator(pd.feedTree)).(float64)) + 1
 
 	return trackNo, nil
+}
+
+func (pd *PropDefs) ExtractProperties() (err error) {
+	for _, propDef := range pd.Definitions {
+		if propDef.List {
+			htmlNodes := htmlquery.Find(pd.scriptTree, propDef.Hook)
+			contents := []string{}
+			for _, htmlNode := range htmlNodes {
+				contents = append(contents, htmlquery.InnerText(htmlNode))
+			}
+			pd.properties[propDef.Name] = contents
+		} else {
+			htmlNode := htmlquery.FindOne(pd.scriptTree, propDef.Hook)
+			if propDef.Attribute != "" {
+				pd.properties[propDef.Name] = htmlquery.SelectAttr(htmlNode, propDef.Attribute)
+			} else {
+				pd.properties[propDef.Name] = htmlquery.InnerText(htmlNode)
+			}
+		}
+	}
+
+	trackNo, err := pd.TrackNo()
+	if err != nil {
+		return err
+	}
+
+	pd.properties["trackNo"] = trackNo
+	pd.properties["pubDate"] = Now()
+	pd.properties["cover"] = pd.Cover
+	pd.properties["artist"] = pd.Artist
+	pd.properties["album"] = pd.Album
+	pd.properties["master"] = strings.Replace(pd.MasterURL, "<FILE>", pd.trackName, 1)
+	pd.properties["intro"] = pd.IntroURL
+
+	return nil
 }

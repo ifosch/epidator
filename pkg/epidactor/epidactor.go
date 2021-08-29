@@ -5,10 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
-	"github.com/antchfx/htmlquery"
 	"github.com/ifosch/stationery/pkg/gdrive"
 	"github.com/ifosch/stationery/pkg/stationery"
 )
@@ -59,53 +57,11 @@ var GetScript = func(episodeTag string) (string, error) {
 	return content, nil
 }
 
-func ExtractProperties(propertiesDefinitions *PropDefs) (properties map[string]interface{}, err error) {
-	properties = map[string]interface{}{}
-
-	for _, propDef := range propertiesDefinitions.Definitions {
-		if propDef.List {
-			htmlNodes := htmlquery.Find(propertiesDefinitions.scriptTree, propDef.Hook)
-			contents := []string{}
-			for _, htmlNode := range htmlNodes {
-				contents = append(contents, htmlquery.InnerText(htmlNode))
-			}
-			properties[propDef.Name] = contents
-		} else {
-			htmlNode := htmlquery.FindOne(propertiesDefinitions.scriptTree, propDef.Hook)
-			if propDef.Attribute != "" {
-				properties[propDef.Name] = htmlquery.SelectAttr(htmlNode, propDef.Attribute)
-			} else {
-				properties[propDef.Name] = htmlquery.InnerText(htmlNode)
-			}
-		}
-	}
-
-	trackNo, err := propertiesDefinitions.TrackNo()
-	if err != nil {
-		return nil, err
-	}
-
-	properties["trackNo"] = trackNo
-	properties["pubDate"] = Now()
-	properties["cover"] = propertiesDefinitions.Cover
-	properties["artist"] = propertiesDefinitions.Artist
-	properties["album"] = propertiesDefinitions.Album
-	properties["master"] = strings.Replace(propertiesDefinitions.MasterURL, "<FILE>", propertiesDefinitions.trackName, 1)
-	properties["intro"] = propertiesDefinitions.IntroURL
-
-	return properties, nil
-}
-
 func GetEpisodeDetails(trackName, propertiesDefinitionsYAML string) (map[string]interface{}, error) {
 	propertiesDefinitions, err := NewPropDefs(trackName, propertiesDefinitionsYAML)
 	if err != nil {
 		return nil, err
 	}
 
-	properties, err := ExtractProperties(propertiesDefinitions)
-	if err != nil {
-		return nil, err
-	}
-
-	return properties, nil
+	return propertiesDefinitions.properties, nil
 }
