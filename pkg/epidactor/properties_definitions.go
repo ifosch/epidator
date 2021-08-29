@@ -102,7 +102,7 @@ func (pd *PropDefs) TrackNo() (int, error) {
 	return trackNo, nil
 }
 
-func (pd *PropDefs) ExtractProperties() (err error) {
+func (pd *PropDefs) ExtractPropertiesFromScript() {
 	for _, propDef := range pd.Definitions {
 		if propDef.List {
 			htmlNodes := htmlquery.Find(pd.scriptTree, propDef.Hook)
@@ -120,19 +120,31 @@ func (pd *PropDefs) ExtractProperties() (err error) {
 			}
 		}
 	}
+}
 
+func (pd *PropDefs) ExtractPropertiesFromFeed() error {
 	trackNo, err := pd.TrackNo()
 	if err != nil {
 		return err
 	}
 
 	pd.properties["trackNo"] = trackNo
-	pd.properties["pubDate"] = Now()
+	return nil
+}
+
+func (pd *PropDefs) ExtractPropertiesFromProperties() {
 	pd.properties["cover"] = pd.Cover
 	pd.properties["artist"] = pd.Artist
 	pd.properties["album"] = pd.Album
 	pd.properties["master"] = strings.Replace(pd.MasterURL, "<FILE>", pd.trackName, 1)
 	pd.properties["intro"] = pd.IntroURL
+}
 
-	return nil
+func (pd *PropDefs) ExtractProperties() (err error) {
+	pd.ExtractPropertiesFromScript()
+	pd.ExtractPropertiesFromProperties()
+	pd.properties["pubDate"] = Now()
+	err = pd.ExtractPropertiesFromFeed()
+
+	return err
 }
