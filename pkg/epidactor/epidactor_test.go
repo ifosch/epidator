@@ -104,7 +104,7 @@ func TestGetEpisodeDetails(t *testing.T) {
 	for _, tt := range tc {
 		GetScript = MockGetScript(tt.episodeScriptHook, tt.script)
 		GetFeed = MockGetFeed(tt.feed)
-		Now = MockNow(tt.expectedOutput["pubDate"].(time.Time))
+		GetPubDate = MockNow(tt.expectedOutput["pubDate"].(time.Time))
 
 		ed, err := GetEpisodeDetails(tt.inputTrackName, tt.inputYAMLFile)
 		if err != nil {
