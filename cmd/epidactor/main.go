@@ -23,15 +23,15 @@ func main() {
 	log.SetFlags(0)
 
 	trackName := os.Args[1]
-	propertiesDefinitionsYAML := os.Getenv("PROPERTIES_DEFINITIONS_YAML")
-	if propertiesDefinitionsYAML == "" {
-		propertiesDefinitionsYAML = "propertiesDefinitions.yaml"
+	podcastYAML := os.Getenv("PODCAST_YAML")
+	if podcastYAML == "" {
+		podcastYAML = "podcast.yaml"
 	}
 
-	properties, err := epidactor.GetEpisodeDetails(trackName, propertiesDefinitionsYAML)
+	details, err := epidactor.GetEpisodeDetails(trackName, podcastYAML)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	PrintYAML(properties)
+	PrintYAML(details)
 }

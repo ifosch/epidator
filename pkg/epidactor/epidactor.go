@@ -57,11 +57,11 @@ var GetScript = func(episodeTag string) (string, error) {
 	return content, nil
 }
 
-func GetEpisodeDetails(trackName, propertiesDefinitionsYAML string) (map[string]interface{}, error) {
-	propertiesDefinitions, err := NewPropDefs(trackName, propertiesDefinitionsYAML)
+func GetEpisodeDetails(trackName, podcastYAML string) (map[string]interface{}, error) {
+	podcast, err := NewPodcast(trackName, podcastYAML)
 	if err != nil {
 		return nil, err
 	}
 
-	return propertiesDefinitions.properties, nil
+	return podcast.details, nil
 }
