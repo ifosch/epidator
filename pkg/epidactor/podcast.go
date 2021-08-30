@@ -49,22 +49,12 @@ func NewPodcast(trackName, YAMLFile string) (*Podcast, error) {
 		return nil, err
 	}
 
-	script, err := GetScript(podcast.EpisodeScriptHook())
+	err = podcast.DownloadScript()
 	if err != nil {
 		return nil, err
 	}
 
-	podcast.scriptTree, err = htmlquery.Parse(strings.NewReader(script))
-	if err != nil {
-		return nil, err
-	}
-
-	feed, err := GetFeed(podcast.FeedURL)
-	if err != nil {
-		return nil, err
-	}
-
-	podcast.feedTree, err = htmlquery.Parse(strings.NewReader(feed))
+	err = podcast.DownloadFeed()
 	if err != nil {
 		return nil, err
 	}
@@ -91,6 +81,34 @@ func (p *Podcast) EpisodeScriptHook() string {
 	}
 
 	return fmt.Sprintf("%s %s", tag, numberRE.FindString(p.trackName))
+}
+
+func (p *Podcast) DownloadScript() error {
+	script, err := GetScript(p.EpisodeScriptHook())
+	if err != nil {
+		return err
+	}
+
+	p.scriptTree, err = htmlquery.Parse(strings.NewReader(script))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *Podcast) DownloadFeed() error {
+	feed, err := GetFeed(p.FeedURL)
+	if err != nil {
+		return err
+	}
+
+	p.feedTree, err = htmlquery.Parse(strings.NewReader(feed))
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (p *Podcast) TrackNo() (int, error) {
