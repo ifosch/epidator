@@ -25,11 +25,11 @@ type PropDefs struct {
 		List      bool   `yaml:"list"`
 		Attribute string `yaml:"attribute"`
 	} `yaml:"scriptFieldHooks"`
-	EpisodeHooks map[string]string `yaml:"episodeHooks"`
-	trackName    string
-	scriptTree   *html.Node
-	feedTree     *html.Node
-	properties   map[string]interface{}
+	EpisodeScriptHooks map[string]string `yaml:"episodeScriptHooks"`
+	trackName          string
+	scriptTree         *html.Node
+	feedTree           *html.Node
+	properties         map[string]interface{}
 }
 
 func NewPropDefs(trackName, YAMLFile string) (*PropDefs, error) {
@@ -47,7 +47,7 @@ func NewPropDefs(trackName, YAMLFile string) (*PropDefs, error) {
 		return nil, err
 	}
 
-	script, err := GetScript(propDefs.EpisodeHook())
+	script, err := GetScript(propDefs.EpisodeScriptHook())
 	if err != nil {
 		return nil, err
 	}
@@ -75,17 +75,17 @@ func NewPropDefs(trackName, YAMLFile string) (*PropDefs, error) {
 	return propDefs, nil
 }
 
-func (pd *PropDefs) EpisodeHook() string {
+func (pd *PropDefs) EpisodeScriptHook() string {
 	numberRE := regexp.MustCompile("[0-9]+")
 
 	tag := ""
-	for k, v := range pd.EpisodeHooks {
+	for k, v := range pd.EpisodeScriptHooks {
 		if strings.Contains(pd.trackName, k) {
 			tag = v
 		}
 	}
 	if tag == "" {
-		tag = pd.EpisodeHooks["default"]
+		tag = pd.EpisodeScriptHooks["default"]
 	}
 
 	return fmt.Sprintf("%s %s", tag, numberRE.FindString(pd.trackName))

@@ -6,36 +6,36 @@ import (
 	"time"
 )
 
-func MockGetScript(expectedEpisodeHook, expectedOutput string) func(string) (string, error) {
-	return func(episodeHook string) (string, error) {
-		if episodeHook != expectedEpisodeHook {
-			return "", fmt.Errorf("document not found. Query was \"name contains '%s'\"", episodeHook)
+func MockGetScript(expected, output string) func(string) (string, error) {
+	return func(episodeScriptHook string) (string, error) {
+		if episodeScriptHook != expected {
+			return "", fmt.Errorf("document not found. Query was \"name contains '%s'\"", episodeScriptHook)
 		}
 
-		return expectedOutput, nil
+		return output, nil
 	}
 }
 
-func MockGetFeed(expectedOutput string) func(string) (string, error) {
+func MockGetFeed(output string) func(string) (string, error) {
 	return func(string) (string, error) {
-		return expectedOutput, nil
+		return output, nil
 	}
 }
 
-func MockNow(fakeTime time.Time) func() time.Time {
+func MockNow(output time.Time) func() time.Time {
 	return func() time.Time {
-		return fakeTime
+		return output
 	}
 }
 
 func TestGetEpisodeDetails(t *testing.T) {
 	tc := []struct {
-		inputTrackName string
-		episodeHook    string
-		inputYAMLFile  string
-		script         string
-		feed           string
-		expectedOutput map[string]interface{}
+		inputTrackName    string
+		episodeScriptHook string
+		inputYAMLFile     string
+		script            string
+		feed              string
+		expectedOutput    map[string]interface{}
 	}{
 		{
 			"mypodcast-1.master.mp3",
@@ -102,7 +102,7 @@ func TestGetEpisodeDetails(t *testing.T) {
 	}
 
 	for _, tt := range tc {
-		GetScript = MockGetScript(tt.episodeHook, tt.script)
+		GetScript = MockGetScript(tt.episodeScriptHook, tt.script)
 		GetFeed = MockGetFeed(tt.feed)
 		Now = MockNow(tt.expectedOutput["pubDate"].(time.Time))
 

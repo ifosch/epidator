@@ -18,6 +18,6 @@ scriptFieldHooks:
 - name: links
   hook: /html/body/ul[last()]/li
   list: true
-episodeHooks:
+episodeScriptHooks:
   default: "Podcast"
   collaboration: "Collaboration"
