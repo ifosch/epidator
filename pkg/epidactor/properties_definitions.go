@@ -13,18 +13,18 @@ import (
 )
 
 type PropDefs struct {
-	FeedURL     string `yaml:"feedURL"`
-	Cover       string `yaml:"cover"`
-	Artist      string `yaml:"artist"`
-	Album       string `yaml:"album"`
-	MasterURL   string `yaml:"masterURL"`
-	IntroURL    string `yaml:"introURL"`
-	Definitions []struct {
+	FeedURL          string `yaml:"feedURL"`
+	Cover            string `yaml:"cover"`
+	Artist           string `yaml:"artist"`
+	Album            string `yaml:"album"`
+	MasterURL        string `yaml:"masterURL"`
+	IntroURL         string `yaml:"introURL"`
+	ScriptFieldHooks []struct {
 		Name      string `yaml:"name"`
 		Hook      string `yaml:"hook"`
 		List      bool   `yaml:"list"`
 		Attribute string `yaml:"attribute"`
-	} `yaml:"propDefs"`
+	} `yaml:"scriptFieldHooks"`
 	EpisodeHooks map[string]string `yaml:"episodeHooks"`
 	trackName    string
 	scriptTree   *html.Node
@@ -103,20 +103,20 @@ func (pd *PropDefs) TrackNo() (int, error) {
 }
 
 func (pd *PropDefs) ExtractPropertiesFromScript() {
-	for _, propDef := range pd.Definitions {
-		if propDef.List {
-			htmlNodes := htmlquery.Find(pd.scriptTree, propDef.Hook)
+	for _, hook := range pd.ScriptFieldHooks {
+		if hook.List {
+			htmlNodes := htmlquery.Find(pd.scriptTree, hook.Hook)
 			contents := []string{}
 			for _, htmlNode := range htmlNodes {
 				contents = append(contents, htmlquery.InnerText(htmlNode))
 			}
-			pd.properties[propDef.Name] = contents
+			pd.properties[hook.Name] = contents
 		} else {
-			htmlNode := htmlquery.FindOne(pd.scriptTree, propDef.Hook)
-			if propDef.Attribute != "" {
-				pd.properties[propDef.Name] = htmlquery.SelectAttr(htmlNode, propDef.Attribute)
+			htmlNode := htmlquery.FindOne(pd.scriptTree, hook.Hook)
+			if hook.Attribute != "" {
+				pd.properties[hook.Name] = htmlquery.SelectAttr(htmlNode, hook.Attribute)
 			} else {
-				pd.properties[propDef.Name] = htmlquery.InnerText(htmlNode)
+				pd.properties[hook.Name] = htmlquery.InnerText(htmlNode)
 			}
 		}
 	}

@@ -4,7 +4,7 @@ masterURL: https://my.podcast.com/masters/<FILE>
 introURL: https://my.podcast.com/media/intro.mp3
 artist: Me
 album: My Podcast
-propDefs:
+scriptFieldHooks:
 - name: title
   hook: /html/body/p/span[contains(@style,"font-size:24pt;")]
   list: false
