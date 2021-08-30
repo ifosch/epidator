@@ -1,5 +1,5 @@
 feedURL: http://my.podcast.com/podcast/feed.xml
-masterURL: https://my.podcast.com/masters/<FILE>
+masterURLPattern: https://my.podcast.com/masters/<FILE>
 directFields:
   introURL: https://my.podcast.com/media/intro.mp3
   cover: https://my.podcast.com/media/cover.png
