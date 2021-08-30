@@ -1,9 +1,10 @@
 feedURL: http://my.podcast.com/podcast/feed.xml
-cover: https://my.podcast.com/media/cover.png
 masterURL: https://my.podcast.com/masters/<FILE>
-introURL: https://my.podcast.com/media/intro.mp3
-artist: Me
-album: My Podcast
+directFields:
+  introURL: https://my.podcast.com/media/intro.mp3
+  cover: https://my.podcast.com/media/cover.png
+  artist: Me
+  album: My Podcast
 scriptFieldHooks:
 - name: title
   hook: /html/body/p/span[contains(@style,"font-size:24pt;")]

@@ -13,12 +13,14 @@ import (
 )
 
 type PropDefs struct {
-	FeedURL          string `yaml:"feedURL"`
-	Cover            string `yaml:"cover"`
-	Artist           string `yaml:"artist"`
-	Album            string `yaml:"album"`
-	MasterURL        string `yaml:"masterURL"`
-	IntroURL         string `yaml:"introURL"`
+	FeedURL      string `yaml:"feedURL"`
+	MasterURL    string `yaml:"masterURL"`
+	DirectFields struct {
+		Cover    string `yaml:"cover"`
+		Artist   string `yaml:"artist"`
+		Album    string `yaml:"album"`
+		IntroURL string `yaml:"introURL"`
+	} `yaml:"directFields"`
 	ScriptFieldHooks []struct {
 		Name      string `yaml:"name"`
 		Hook      string `yaml:"hook"`
@@ -132,17 +134,17 @@ func (pd *PropDefs) ExtractPropertiesFromFeed() error {
 	return nil
 }
 
-func (pd *PropDefs) ExtractPropertiesFromProperties() {
-	pd.properties["cover"] = pd.Cover
-	pd.properties["artist"] = pd.Artist
-	pd.properties["album"] = pd.Album
+func (pd *PropDefs) ExtractDirectProperties() {
+	pd.properties["cover"] = pd.DirectFields.Cover
+	pd.properties["artist"] = pd.DirectFields.Artist
+	pd.properties["album"] = pd.DirectFields.Album
 	pd.properties["master"] = strings.Replace(pd.MasterURL, "<FILE>", pd.trackName, 1)
-	pd.properties["intro"] = pd.IntroURL
+	pd.properties["intro"] = pd.DirectFields.IntroURL
 }
 
 func (pd *PropDefs) ExtractProperties() (err error) {
 	pd.ExtractPropertiesFromScript()
-	pd.ExtractPropertiesFromProperties()
+	pd.ExtractDirectProperties()
 	pd.properties["pubDate"] = Now()
 	err = pd.ExtractPropertiesFromFeed()
 
