@@ -89,7 +89,6 @@ jobs:
         name: Install ineffassign
         run: |
           go install github.com/gordonklaus/ineffassign@latest
-          go get golang.org/x/net/html@latest
       -
         name: Check ineffectual assignments
         run: |
