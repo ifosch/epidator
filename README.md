@@ -9,7 +9,7 @@ You'll need to get credentials for a [service account](https://support.google.co
 ## Install
 ### Downloadable binaries
 
-To get compiled binaries for Windows, MacOS, and Linux, on amd64 architecture, you can go to any of our [releases](https://github.com/ifosch/epidator/releases).
+To get compiled binaries for Windows, MacOS, and Linux, on amd64 architecture, you can go to any of our [releases](https://github.com/EDyO/epidator/releases).
 
 ### From source code
 
