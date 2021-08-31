@@ -17,8 +17,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+// GetPubDate returns the `time.Time` value for current publication.
 var GetPubDate = time.Now
 
+// GetFeed returns the content of the XML feed defined in `URL`, or an error.
 var GetFeed = func(URL string) (string, error) {
 	resp, err := http.Get(URL)
 	if err != nil {
@@ -34,6 +36,7 @@ var GetFeed = func(URL string) (string, error) {
 	return string(bodyBytes), nil
 }
 
+// GetScript returns the content of the script which name matches the `episodeTag` in HTML, or an error.
 var GetScript = func(episodeTag string) (string, error) {
 	q := fmt.Sprintf("name contains '%v'", episodeTag)
 
@@ -63,6 +66,7 @@ var GetScript = func(episodeTag string) (string, error) {
 	return content, nil
 }
 
+// Podcast contains all the parameters to get the episode details for a podcast.
 type Podcast struct {
 	FeedURL          string `yaml:"feedURL"`
 	MasterURLPattern string `yaml:"masterURLPattern"`
@@ -85,6 +89,7 @@ type Podcast struct {
 	details            map[string]interface{}
 }
 
+// NewPodcast constructs the `Podcast` object for a `trackName` according with the properties defined in the `YAMLFile`, or an error.
 func NewPodcast(trackName, YAMLFile string) (*Podcast, error) {
 	f, err := ioutil.ReadFile(YAMLFile)
 	if err != nil {
