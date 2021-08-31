@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-func PrintYAML(properties map[string]interface{}) error {
+func printYAML(properties map[string]interface{}) error {
 	outputData, err := yaml.Marshal(properties)
 	if err != nil {
 		return err
@@ -33,5 +33,5 @@ func main() {
 		log.Fatal(err)
 	}
 
-	PrintYAML(details)
+	printYAML(details)
 }

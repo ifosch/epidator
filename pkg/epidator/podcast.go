@@ -100,17 +100,17 @@ func NewPodcast(trackName, YAMLFile string) (*Podcast, error) {
 		return nil, err
 	}
 
-	err = podcast.DownloadScript()
+	err = podcast.downloadScript()
 	if err != nil {
 		return nil, err
 	}
 
-	err = podcast.DownloadFeed()
+	err = podcast.downloadFeed()
 	if err != nil {
 		return nil, err
 	}
 
-	err = podcast.ExtractProperties()
+	err = podcast.extractProperties()
 	if err != nil {
 		return nil, err
 	}
@@ -118,7 +118,7 @@ func NewPodcast(trackName, YAMLFile string) (*Podcast, error) {
 	return podcast, nil
 }
 
-func (p *Podcast) EpisodeScriptHook() string {
+func (p *Podcast) episodeScriptHook() string {
 	numberRE := regexp.MustCompile("[0-9]+")
 
 	tag := ""
@@ -134,8 +134,8 @@ func (p *Podcast) EpisodeScriptHook() string {
 	return fmt.Sprintf("%s %s", tag, numberRE.FindString(p.trackName))
 }
 
-func (p *Podcast) DownloadScript() error {
-	script, err := GetScript(p.EpisodeScriptHook())
+func (p *Podcast) downloadScript() error {
+	script, err := GetScript(p.episodeScriptHook())
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,7 @@ func (p *Podcast) DownloadScript() error {
 	return nil
 }
 
-func (p *Podcast) DownloadFeed() error {
+func (p *Podcast) downloadFeed() error {
 	feed, err := GetFeed(p.FeedURL)
 	if err != nil {
 		return err
@@ -162,7 +162,7 @@ func (p *Podcast) DownloadFeed() error {
 	return nil
 }
 
-func (p *Podcast) TrackNo() (int, error) {
+func (p *Podcast) trackNo() (int, error) {
 	expr, err := xpath.Compile("count(//item)")
 	if err != nil {
 		return 0, err
@@ -173,7 +173,7 @@ func (p *Podcast) TrackNo() (int, error) {
 	return trackNo, nil
 }
 
-func (p *Podcast) ExtractPropertiesFromScript() {
+func (p *Podcast) extractPropertiesFromScript() {
 	for _, hook := range p.ScriptFieldHooks {
 		if hook.List {
 			htmlNodes := htmlquery.Find(p.scriptTree, hook.Hook)
@@ -193,8 +193,8 @@ func (p *Podcast) ExtractPropertiesFromScript() {
 	}
 }
 
-func (pd *Podcast) ExtractPropertiesFromFeed() error {
-	trackNo, err := pd.TrackNo()
+func (pd *Podcast) extractPropertiesFromFeed() error {
+	trackNo, err := pd.trackNo()
 	if err != nil {
 		return err
 	}
@@ -203,19 +203,19 @@ func (pd *Podcast) ExtractPropertiesFromFeed() error {
 	return nil
 }
 
-func (p *Podcast) ExtractDirectProperties() {
+func (p *Podcast) extractDirectProperties() {
 	p.details["cover"] = p.DirectFields.Cover
 	p.details["artist"] = p.DirectFields.Artist
 	p.details["album"] = p.DirectFields.Album
 	p.details["intro"] = p.DirectFields.IntroURL
 }
 
-func (p *Podcast) ExtractProperties() (err error) {
-	p.ExtractPropertiesFromScript()
-	p.ExtractDirectProperties()
+func (p *Podcast) extractProperties() (err error) {
+	p.extractPropertiesFromScript()
+	p.extractDirectProperties()
 	p.details["pubDate"] = GetPubDate()
 	p.details["master"] = strings.Replace(p.MasterURLPattern, "<FILE>", p.trackName, 1)
-	err = p.ExtractPropertiesFromFeed()
+	err = p.extractPropertiesFromFeed()
 
 	return err
 }
