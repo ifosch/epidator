@@ -1,4 +1,4 @@
-module github.com/EDyO/epidactor
+module github.com/EDyO/epidator
 
 go 1.17
 

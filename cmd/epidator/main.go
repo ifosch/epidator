@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/EDyO/epidactor/pkg/epidactor"
+	"github.com/EDyO/epidator/pkg/epidator"
 	"gopkg.in/yaml.v2"
 )
 
@@ -28,7 +28,7 @@ func main() {
 		podcastYAML = "podcast.yaml"
 	}
 
-	details, err := epidactor.GetEpisodeDetails(trackName, podcastYAML)
+	details, err := epidator.GetEpisodeDetails(trackName, podcastYAML)
 	if err != nil {
 		log.Fatal(err)
 	}

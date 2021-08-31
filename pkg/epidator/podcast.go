@@ -1,4 +1,4 @@
-package epidactor
+package epidator
 
 import (
 	"fmt"
