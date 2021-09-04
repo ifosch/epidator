@@ -42,6 +42,7 @@ This file has the following possible lines:
   - hook: This must be an XPath search string to identify the value from the script for this field
   - list: false
 - episodeScriptHooks: This is a map (`key: value`) of different types of episodes (podcast, pills, etc.)
+- episodeBucket: This is the bucket name where all the published tracks are stored
   The program uses the key as a pattern match on the track name, along with the number, to identify the script.
   The `default` key must be present.
 
@@ -60,4 +61,5 @@ intro: https://my.podcast.com/media/intro.mp3
 master: https://my.podcast.com/masters/episode-1.master.mp3
 pubDate: 2021-08-31T20:52:50.658906773+02:00
 trackNo: 1
+bucket: mypodcast-episodes
 ```

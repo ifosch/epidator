@@ -71,10 +71,11 @@ type Podcast struct {
 	FeedURL          string `yaml:"feedURL"`
 	MasterURLPattern string `yaml:"masterURLPattern"`
 	DirectFields     struct {
-		Cover    string `yaml:"cover"`
-		Artist   string `yaml:"artist"`
-		Album    string `yaml:"album"`
-		IntroURL string `yaml:"introURL"`
+		Cover         string `yaml:"cover"`
+		Artist        string `yaml:"artist"`
+		Album         string `yaml:"album"`
+		IntroURL      string `yaml:"introURL"`
+		EpisodeBucket string `yaml:"episodeBucket"`
 	} `yaml:"directFields"`
 	ScriptFieldHooks []struct {
 		Name      string `yaml:"name"`
@@ -213,6 +214,7 @@ func (p *Podcast) extractDirectProperties() {
 	p.details["artist"] = p.DirectFields.Artist
 	p.details["album"] = p.DirectFields.Album
 	p.details["intro"] = p.DirectFields.IntroURL
+	p.details["bucket"] = p.DirectFields.EpisodeBucket
 }
 
 func (p *Podcast) extractProperties() (err error) {
