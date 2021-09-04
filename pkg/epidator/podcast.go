@@ -198,13 +198,13 @@ func (p *Podcast) extractPropertiesFromScript() {
 	}
 }
 
-func (pd *Podcast) extractPropertiesFromFeed() error {
-	trackNo, err := pd.trackNo()
+func (p *Podcast) extractPropertiesFromFeed() error {
+	trackNo, err := p.trackNo()
 	if err != nil {
 		return err
 	}
 
-	pd.details["trackNo"] = trackNo
+	p.details["trackNo"] = trackNo
 	return nil
 }
 
