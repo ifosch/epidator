@@ -65,6 +65,7 @@ func TestGetEpisodeDetails(t *testing.T) {
 				"summary": "In this episode I'll talk about my podcast.",
 				"title":   "Podcast 1 - My Podcast",
 				"trackNo": 1,
+				"bucket":  "mypodcast-episodes",
 			},
 		},
 		{
@@ -97,6 +98,7 @@ func TestGetEpisodeDetails(t *testing.T) {
 				"summary": "In this collaboration, I'm hosting my friend's episode.",
 				"title":   "Collaboration 1 - My friend's episode",
 				"trackNo": 2,
+				"bucket":  "mypodcast-episodes",
 			},
 		},
 	}
