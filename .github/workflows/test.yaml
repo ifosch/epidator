@@ -95,6 +95,10 @@ jobs:
         run: |
           go install github.com/gordonklaus/ineffassign@latest
       -
+        name: Download dependencies to local
+        run : |
+          go mod download
+      -
         name: Check ineffectual assignments
         run: |
           ineffassign ./...
