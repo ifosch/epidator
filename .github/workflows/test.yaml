@@ -121,6 +121,29 @@ jobs:
         name: Check spelling
         run: |
           misspell -error .
+  staticcheck:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      -
+        name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '^1.16'
+      -
+        name: Install staticcheck
+        run: |
+          go get -u honnef.co/go/tools/cmd/staticcheck@latest
+      -
+        name: Download dependencies to local
+        run : |
+          go mod download
+      -
+        name: Run staticcheck
+        run: |
+          staticcheck ./...
   check-license:
     runs-on: ubuntu-latest
     steps:
