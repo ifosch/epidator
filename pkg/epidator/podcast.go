@@ -70,6 +70,7 @@ var GetScript = func(episodeTag string) (string, error) {
 type Podcast struct {
 	FeedURL          string `yaml:"feedURL"`
 	MasterURLPattern string `yaml:"masterURLPattern"`
+	PublishURL       string `yaml:"publishURL"`
 	DirectFields     struct {
 		Cover         string `yaml:"cover"`
 		Artist        string `yaml:"artist"`
@@ -222,6 +223,7 @@ func (p *Podcast) extractProperties() (err error) {
 	p.extractDirectProperties()
 	p.details["pubDate"] = GetPubDate()
 	p.details["master"] = strings.Replace(p.MasterURLPattern, "<FILE>", p.trackName, 1)
+	p.details["episodeURL"] = fmt.Sprintf("%s/%s", p.PublishURL, strings.Replace(p.trackName, ".master", "", 1))
 	err = p.extractPropertiesFromFeed()
 
 	return err
