@@ -71,6 +71,7 @@ type Podcast struct {
 	FeedURL          string `yaml:"feedURL"`
 	MasterURLPattern string `yaml:"masterURLPattern"`
 	PublishURL       string `yaml:"publishURL"`
+	DistributionID   string `yaml:"distributionID"`
 	DirectFields     struct {
 		Cover         string `yaml:"cover"`
 		Artist        string `yaml:"artist"`
@@ -224,6 +225,7 @@ func (p *Podcast) extractProperties() (err error) {
 	p.details["pubDate"] = GetPubDate()
 	p.details["master"] = strings.Replace(p.MasterURLPattern, "<FILE>", p.trackName, 1)
 	p.details["episodeURL"] = fmt.Sprintf("%s/%s", p.PublishURL, strings.Replace(p.trackName, ".master", "", 1))
+	p.details["distributionID"] = p.DistributionID
 	err = p.extractPropertiesFromFeed()
 
 	return err

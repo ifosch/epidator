@@ -1,6 +1,7 @@
 feedURL: http://my.podcast.com/podcast/feed.xml
 masterURLPattern: https://my.podcast.com/masters/<FILE>
 publishURL: https://my.podcast.com/podcast
+distributionID: XXXXXXXXX
 directFields:
   introURL: https://my.podcast.com/media/intro.mp3
   cover: https://my.podcast.com/media/cover.png
